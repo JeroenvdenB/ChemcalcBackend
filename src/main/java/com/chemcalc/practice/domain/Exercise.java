@@ -52,7 +52,7 @@ public class Exercise {
 		Random subRandom = new Random(seed);
 		for (int i=0; i<repetitions; i++) {
 			long subseed = subRandom.nextLong();
-			Question q = new Question(questionType, subseed); //TODO: input type and seed, needs constructor first
+			Question q = new Question(questionType, subseed);
 			questionsList.add(q);
 		}
 	}

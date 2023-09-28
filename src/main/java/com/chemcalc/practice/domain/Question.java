@@ -57,13 +57,7 @@ public class Question {
 		
 		// mass to moles is calculated by dividing the mass by the molar mass
 		this.answerValue = starterAmount.divide(molarMass, threeDigit);
-		this.answerKeyString = String.format("%s / %s = %s mol", starterAmount.toPlainString(), molarMass.toPlainString(), answerValue.toPlainString());
-		
-//		Debug syso's
-//		System.out.println(questionText);
-//		System.out.println(answerValue.toPlainString());
-//		System.out.println(answerKeyString);
-	
+		this.answerKeyString = String.format("%s / %s = %s mol", starterAmount.toPlainString(), molarMass.toPlainString(), answerValue.toPlainString());	
 	}
 	
 	private void createMolMass(long seed) {
@@ -78,11 +72,6 @@ public class Question {
 		// moles to mass: multiply moles by molar mass
 		this.answerValue = starterAmount.multiply(molarMass, threeDigit);
 		this.answerKeyString = String.format("%s x %s = %s gram", starterAmount.toPlainString(), molarMass.toPlainString(), answerValue.toPlainString());
-		
-//		Debug syso's
-		System.out.println(questionText);
-		System.out.println(answerValue.toPlainString());
-		System.out.println(answerKeyString);
 	}
 
 	public String getQuestionText() {
