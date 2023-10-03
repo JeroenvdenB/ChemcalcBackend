@@ -2,7 +2,13 @@ package com.chemcalc.practice.domain;
 
 import java.math.BigDecimal;
 import java.util.Random;
+
+import org.apache.el.stream.Optional;
+
 import java.math.MathContext;
+
+import com.chemcalc.practice.controller.CompoundService;
+import com.chemcalc.practice.domain.Compound;
 
 public class Question {
 	

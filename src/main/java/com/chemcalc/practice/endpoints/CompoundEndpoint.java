@@ -40,6 +40,11 @@ public class CompoundEndpoint {
 		compoundService.deleteCompound(id);
 	}
 	
+	@GetMapping("randomCompound")
+	public Optional<Compound> randomCompound() {
+		return compoundService.randomCompound();
+	}
+	
 	//UpdateCompound is the only untested endpoint rn
 	@PutMapping("updateCompound")
 	public void updateCompound(@RequestBody Compound compound) {
