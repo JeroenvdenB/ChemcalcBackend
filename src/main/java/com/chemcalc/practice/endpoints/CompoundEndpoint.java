@@ -1,5 +1,6 @@
 package com.chemcalc.practice.endpoints;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +41,9 @@ public class CompoundEndpoint {
 		compoundService.deleteCompound(id);
 	}
 	
-	@GetMapping("randomCompound")
-	public Optional<Compound> randomCompound() {
-		return compoundService.randomCompound();
+	@GetMapping("randomCompound/{limit}")
+	public List<Compound> randomCompound(@PathVariable("limit") Integer limit) {
+		return compoundService.randomCompound(limit);
 	}
 	
 	//UpdateCompound is the only untested endpoint rn
@@ -64,7 +65,6 @@ public class CompoundEndpoint {
 			dbCompound.setPhase(compound.getPhase());
 			
 			compoundService.saveCompound(dbCompound);		
-			System.out.println("All properties updated through endpoint updateCompound.");
 		}
 	}
 }

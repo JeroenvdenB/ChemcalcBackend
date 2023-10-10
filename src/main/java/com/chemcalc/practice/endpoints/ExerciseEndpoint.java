@@ -1,5 +1,7 @@
 package com.chemcalc.practice.endpoints;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,19 +18,20 @@ public class ExerciseEndpoint {
 	
 	@GetMapping("generateExercise/{type}/{repetitions}/{seed}")
 	public Exercise generateExercise(@PathVariable String type, @PathVariable int repetitions, @PathVariable long seed ) {
-		Exercise exercise = new Exercise(type, repetitions, seed);
-		
 		//Try to call random compound from here. IT WORKS
 		//Use 'repetitions' from the pathvariable to call that exact number of random compounds.
-		Compound compound = compoundService.randomCompound().get();
-		System.out.println(compound.getName());
 		
+		List<Compound> compounds = compoundService.randomCompound(repetitions);
+		Exercise exercise = new Exercise(type, repetitions, seed);
+		exercise.createQuestions(compounds);		
 		return exercise;
 	}
 	
 	@GetMapping("generateExercise/{type}/{repetitions}")
 	public Exercise generateExercise(@PathVariable String type, @PathVariable int repetitions) {
 		Exercise exercise = new Exercise(type, repetitions);
+		List<Compound> compounds = compoundService.randomCompound(repetitions);
+		exercise.createQuestions(compounds);
 		return exercise;
 	} 
 	

@@ -1,5 +1,6 @@
 package com.chemcalc.practice.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +30,8 @@ public class CompoundService {
 		compoundRepository.deleteById(id);
 	}
 	
-	public Optional<Compound> randomCompound() {
-		return compoundRepository.randomCompound();
+	public List<Compound> randomCompound(int limit) {
+		return compoundRepository.randomCompound(limit);
 	}
 	
 }

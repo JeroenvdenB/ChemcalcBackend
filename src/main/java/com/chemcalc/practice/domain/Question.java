@@ -12,16 +12,15 @@ import com.chemcalc.practice.domain.Compound;
 
 public class Question {
 	
-	private String questionText;
-	private int compoundId; //corresponds to database id for compound;
-	//private Compound compound;
-	private BigDecimal molarMass;
-	private BigDecimal starterAmount;
-	private BigDecimal answerValue;
-	private String answerKeyString;
+	private Compound compound;			//argument for the Question constructor. Gets set in constructor.
+	private Random seededRandomNums;	//argument for the Question constructor. Gets set in constructor.
+	private String questionText;		//set in createXX() method. Question type specific.
+	private BigDecimal starterAmount;	//set in createXX() method. Question type specific.
+	private BigDecimal answerValue;		//set in createXX() method. Question type specific.
+	private String answerKeyString;		//set in createXX() method. Question type specific.
 	
-	private MathContext threeDigit = new MathContext(3);
-	private MathContext fourDigit = new MathContext(4);
+	private MathContext threeDigit = new MathContext(3);	//set here - valid for all question types
+	private MathContext fourDigit = new MathContext(4);		//set here - valid for all question types
 	
 	public Question() {
 		//The no-argument constructor will create a test question
@@ -29,17 +28,25 @@ public class Question {
 		
 		this.questionText = "Dit is een testvraag met default param.\n"
 				+ "Hoeveel mol komt overeen met 10.0 gram CH4?";
-		this.molarMass = new BigDecimal(16.0);
+		BigDecimal molarMass = new BigDecimal(16.0);
 		this.starterAmount = new BigDecimal(10.0);
 		this.answerValue = starterAmount.divide(molarMass);
 		this.answerKeyString = "10.0 / 16.0 = 0.625 mol CH4";
 	}
 	
-	public Question(String questiontype, long seed) {
-		//Approach: the switch figures out the questionType and calls 
-		//the correct method to further construct the question.
-		//I split the making of the question into methods instead of
-		//the constructor to keep the constructor more concise.
+	public Question(String questiontype, long seed, Compound compound) {
+		/* The constructor sets the compound and creates the random
+		 * numbers object with the seed. This object is later used
+		 * to create random compound amounts. 
+		 * 
+		 * Then the constructor determines the question type and 
+		 * calls the corresponding method. Each type has
+		 * its own method for easy debugging and expandability.
+		 */
+		
+		this.compound = compound;
+		this.seededRandomNums = new Random(seed);
+
 		switch(questiontype) {
 		case "MassMol":
 			this.createMassMol(seed);
@@ -48,36 +55,30 @@ public class Question {
 			this.createMolMass(seed);
 			break;
 		default:
-			System.out.println("Invalid question type in Question(String, long) constructor");
+			System.out.println("Invalid question type in Question(String, long, Compound) constructor");
 		}
 	}
 	
 	private void createMassMol(long seed) {
-		Random randnums = new Random(seed);
+		//Adjust multiplication factor here to finetune the answers range
+		int factor = 50;
 		
-		this.compoundId = 0; //Database not ready yet -- substitute for a random database ID later
-		this.molarMass = new BigDecimal(16.04, fourDigit); //pull from compound when the object is done
-		this.starterAmount = new BigDecimal(randnums.nextDouble()*10, threeDigit);
+		this.starterAmount = new BigDecimal(seededRandomNums.nextDouble()*factor, threeDigit);
+		this.questionText = String.format("Bereken hoeveel mol overeenkomt met %s gram %s.", starterAmount.toPlainString(), compound.getHtmlFormula());
 		
-		this.questionText = String.format("Bereken hoeveel mol overeenkomt met %s gram %s.", starterAmount.toPlainString(), "CH4");
-		
-		// mass to moles is calculated by dividing the mass by the molar mass
-		this.answerValue = starterAmount.divide(molarMass, threeDigit);
-		this.answerKeyString = String.format("%s / %s = %s mol", starterAmount.toPlainString(), molarMass.toPlainString(), answerValue.toPlainString());	
+		// mass to moles: divide the mass by the molar mass
+		this.answerValue = starterAmount.divide(compound.getMolarMass(), threeDigit);
+		this.answerKeyString = String.format("%s / %s = %s mol", starterAmount.toPlainString(), compound.getMolarMass().toPlainString(), answerValue.toPlainString());	
 	}
 	
 	private void createMolMass(long seed) {
-		Random randnums = new Random(seed);
-		
-		this.compoundId = 0; //Database not ready yet -- substitute for a random database ID later
-		this.molarMass = new BigDecimal(16.04, fourDigit); //pull from compound when the object is done
-		this.starterAmount = new BigDecimal(randnums.nextDouble()*3, threeDigit);
-		
-		this.questionText = String.format("Bereken hoeveel gram overeenkomt met %s mol %s.", starterAmount.toPlainString(), "CH4");
+
+		this.starterAmount = new BigDecimal(seededRandomNums.nextDouble()*3, threeDigit);
+		this.questionText = String.format("Bereken hoeveel gram overeenkomt met %s mol %s.", starterAmount.toPlainString(), compound.getHtmlFormula());
 		
 		// moles to mass: multiply moles by molar mass
-		this.answerValue = starterAmount.multiply(molarMass, threeDigit);
-		this.answerKeyString = String.format("%s x %s = %s gram", starterAmount.toPlainString(), molarMass.toPlainString(), answerValue.toPlainString());
+		this.answerValue = starterAmount.multiply(compound.getMolarMass(), threeDigit);
+		this.answerKeyString = String.format("%s x %s = %s gram", starterAmount.toPlainString(), compound.getMolarMass().toPlainString(), answerValue.toPlainString());
 	}
 
 	public String getQuestionText() {
@@ -86,22 +87,6 @@ public class Question {
 
 	public void setQuestionText(String questionText) {
 		this.questionText = questionText;
-	}
-
-	public int getCompoundId() {
-		return compoundId;
-	}
-
-	public void setCompoundId(int compoundId) {
-		this.compoundId = compoundId;
-	}
-
-	public BigDecimal getMolarMass() {
-		return molarMass;
-	}
-
-	public void setMolarMass(BigDecimal molarMass) {
-		this.molarMass = molarMass;
 	}
 
 	public BigDecimal getStarterAmount() {
@@ -126,6 +111,22 @@ public class Question {
 
 	public void setAnswerKeyString(String answerKeyString) {
 		this.answerKeyString = answerKeyString;
+	}
+	
+	public Compound getCompound() {
+		return compound;
+	}
+
+	public void setCompound(Compound compound) {
+		this.compound = compound;
+	}
+
+	public Random getSeededRandomNums() {
+		return seededRandomNums;
+	}
+
+	public void setSeededRandomNums(Random seededRandomNums) {
+		this.seededRandomNums = seededRandomNums;
 	}
 	
 	
