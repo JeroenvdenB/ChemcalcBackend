@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.NamedQuery;
 import jakarta.persistence.SequenceGenerator;
 
 @Entity
@@ -29,6 +30,7 @@ public class Compound {
 	private String htmlFormula;
 	private String composition;
 	private String phase;
+	private String type;
 	
 	
 	public long getId() {
@@ -73,5 +75,11 @@ public class Compound {
 	public void setMolarMass(BigDecimal molarMass) {
 		this.molarMass = molarMass;
 	}
-	
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+
 }

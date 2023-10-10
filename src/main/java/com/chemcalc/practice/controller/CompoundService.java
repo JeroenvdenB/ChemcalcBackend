@@ -32,6 +32,5 @@ public class CompoundService {
 	
 	public List<Compound> randomCompound(int limit) {
 		return compoundRepository.randomCompound(limit);
-	}
-	
+	}	
 }

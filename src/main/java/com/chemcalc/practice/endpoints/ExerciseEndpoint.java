@@ -18,9 +18,8 @@ public class ExerciseEndpoint {
 	
 	@GetMapping("generateExercise/{type}/{repetitions}/{seed}")
 	public Exercise generateExercise(@PathVariable String type, @PathVariable int repetitions, @PathVariable long seed ) {
-		//Try to call random compound from here. IT WORKS
-		//Use 'repetitions' from the pathvariable to call that exact number of random compounds.
 		
+		//Use 'repetitions' from the pathvariable to call that exact number of random compounds.
 		List<Compound> compounds = compoundService.randomCompound(repetitions);
 		Exercise exercise = new Exercise(type, repetitions, seed);
 		exercise.createQuestions(compounds);		
