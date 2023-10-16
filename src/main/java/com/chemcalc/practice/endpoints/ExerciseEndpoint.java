@@ -20,19 +20,9 @@ public class ExerciseEndpoint {
 	public Exercise generateExercise(@PathVariable String type, @PathVariable int repetitions, @PathVariable long seed ) {
 		
 		//Use 'repetitions' from the pathvariable to call that exact number of random compounds.
-		List<Compound> compounds = compoundService.randomCompound(repetitions);
+		List<Compound> compounds = compoundService.randomCompound(repetitions, seed);
 		Exercise exercise = new Exercise(type, repetitions, seed);
 		exercise.createQuestions(compounds);		
 		return exercise;
-	}
-	
-	@GetMapping("generateExercise/{type}/{repetitions}")
-	public Exercise generateExercise(@PathVariable String type, @PathVariable int repetitions) {
-		Exercise exercise = new Exercise(type, repetitions);
-		List<Compound> compounds = compoundService.randomCompound(repetitions);
-		exercise.createQuestions(compounds);
-		return exercise;
-	} 
-	
-	
+	}	
 }

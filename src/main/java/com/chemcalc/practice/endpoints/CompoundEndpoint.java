@@ -2,6 +2,7 @@ package com.chemcalc.practice.endpoints;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,7 +44,10 @@ public class CompoundEndpoint {
 	
 	@GetMapping("randomCompound/{limit}")
 	public List<Compound> randomCompound(@PathVariable("limit") Integer limit) {
-		return compoundService.randomCompound(limit);
+		Random random = new Random();
+		int seed = random.nextInt(); 
+		//seed is automatically promoted to long for randomCompound(int, long)
+		return compoundService.randomCompound(limit, seed); 
 	}
 	
 	//UpdateCompound is the only untested endpoint rn

@@ -30,7 +30,7 @@ public class CompoundService {
 		compoundRepository.deleteById(id);
 	}
 	
-	public List<Compound> randomCompound(int limit) {
-		return compoundRepository.randomCompound(limit);
+	public List<Compound> randomCompound(int limit, long seed) {
+		return compoundRepository.randomCompound(seed, limit);
 	}	
 }

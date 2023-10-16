@@ -11,6 +11,6 @@ import com.chemcalc.practice.domain.Compound;
 
 @Component
 public interface CompoundRepository extends CrudRepository<Compound, Long> {
-	@Query(value = "SELECT * FROM compound ORDER BY RAND() LIMIT ?", nativeQuery = true)
-	List<Compound> randomCompound(int limit);
+	@Query(value = "SELECT * FROM compound ORDER BY RAND(?) LIMIT ?", nativeQuery = true)
+	List<Compound> randomCompound(long seed, int limit);
 }
