@@ -16,12 +16,12 @@ public class ExerciseEndpoint {
 	@Autowired
 	CompoundService compoundService;
 	
-	@GetMapping("generateExercise/{type}/{repetitions}/{seed}")
-	public Exercise generateExercise(@PathVariable String type, @PathVariable int repetitions, @PathVariable long seed ) {
+	@GetMapping("generateRandomExercise/{repetitions}/{seed}")
+	public Exercise generateExercise(@PathVariable int repetitions, @PathVariable long seed ) {
 		
 		//Use 'repetitions' from the pathvariable to call that exact number of random compounds.
 		List<Compound> compounds = compoundService.randomCompound(repetitions, seed);
-		Exercise exercise = new Exercise(type, repetitions, seed);
+		Exercise exercise = new Exercise("Random", repetitions, seed);
 		exercise.createQuestions(compounds);		
 		return exercise;
 	}	
