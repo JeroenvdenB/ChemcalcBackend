@@ -67,6 +67,7 @@ public class CompoundEndpoint {
 			dbCompound.setHtmlFormula(compound.getHtmlFormula());
 			dbCompound.setComposition(compound.getComposition());
 			dbCompound.setPhase(compound.getPhase());
+			dbCompound.setType(compound.getType());
 			
 			compoundService.saveCompound(dbCompound);		
 		}
