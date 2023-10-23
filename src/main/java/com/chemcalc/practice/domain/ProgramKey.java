@@ -17,7 +17,7 @@ public class ProgramKey {
 	
 	private String email;
 	private String organisation;
-	private String keyHash;
+	private String keyString;
 	private String expirationDate;
 	
 	public long getId() {
@@ -38,11 +38,11 @@ public class ProgramKey {
 	public void setOrganisation(String organisation) {
 		this.organisation = organisation;
 	}
-	public String getKeyHash() {
-		return keyHash;
+	public String getKeyString() {
+		return keyString;
 	}
-	public void setKeyHash(String keyHash) {
-		this.keyHash = keyHash;
+	public void setKeyString(String keyString) {
+		this.keyString = keyString;
 	}
 	public String getExpirationDate() {
 		return expirationDate;

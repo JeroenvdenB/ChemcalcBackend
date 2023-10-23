@@ -5,12 +5,14 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.chemcalc.practice.domain.Compound;
@@ -34,6 +36,14 @@ public class CompoundEndpoint {
 	@PostMapping("addCompound")
 	public void addCompound(@RequestBody Compound compound) {
 		compoundService.saveCompound(compound);
+	}
+	
+	@PutMapping("madeUpHeader")
+	public void header(@RequestHeader("made-up") String thing) { // This works, just make sure to add the header to the CORS filter
+		System.out.println(thing);
+		//include API key in headers for DB-altering endpoints
+		//And check if the provided key is in the database
+		//The 'login' is also just a key-check to let a user onto the page
 	}
 	
 	@DeleteMapping("deleteCompound")
