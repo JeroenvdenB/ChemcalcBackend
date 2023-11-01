@@ -1,8 +1,10 @@
 package com.chemcalc.practice.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 
 import com.chemcalc.practice.domain.Compound;
@@ -27,4 +29,8 @@ public class CompoundService {
 	public void deleteCompound(long id) {
 		compoundRepository.deleteById(id);
 	}
+	
+	public List<Compound> randomCompound(int limit, long seed) {
+		return compoundRepository.randomCompound(seed, limit);
+	}	
 }
