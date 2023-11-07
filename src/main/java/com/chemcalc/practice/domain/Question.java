@@ -41,6 +41,8 @@ public class Question {
 		 * 		Mol to particles (any compound)
 		 * 		Mol to molarity (any non-metal except water)
 		 * 		Molarity to mol (any non-metal except water)
+		 * 		Mol salt to molarity ions (any salt) 
+		 * 		Molarity of ions to mol salt (any salt)
 		 * 		Molarity to volume required (any non-metal, except water)
 		 * 		Particles to mol (any non-salt)
 		 * 		Mol to gas volume (any gas)
@@ -49,14 +51,16 @@ public class Question {
 		 * 		Volume to mass (any non-gas with a density)
 		 * 
 		 * "2-step" questions:
-		 * 		Molarity to mass (any compound)
-		 * 		Mass to molarity (any compound)
-		 * 		Mass to particles (any compound)
-		 * 		Particles to mass (any non-salt)
-		 * 		Volume to mol (any non-gas with a density)
-		 * 		Mol to volume (any non-gas with a density)
-		 * 		Particles to molarity (???)
-		 * 		Molarity to particles (???)
+		 * 		Molarity to mass (any non-metal except water)
+		 * 		Molarity of ions to mass of salt (any salt)
+		 * 		Mass to molarity (any non-metal except water) TODO 
+		 * 		Mass to particles (any compound) TODO
+		 * 		Mass to volume gas (any gas at 295 K) TODO 
+		 * 		Particles to mass (any non-salt) TODO
+		 * 		Volume to mol (any non-gas with a density) TODO
+		 * 		Mol to volume (any non-gas with a density) TODO 
+		 * 		Particles to molarity (???) TODO 
+		 * 		Molarity to particles (???) TODO 
 		 * 
 		 */
 		
@@ -80,10 +84,18 @@ public class Question {
 				questionTypes.add("MolMolarity"); 
 				questionTypes.add("MolarityMol"); 
 				questionTypes.add("MolarityVolume");
+				questionTypes.add("MolarityMass");
+				
 			}
 				
 			if (!compound.getType().equals("zout")) {
 				questionTypes.add("ParticlesMol");				
+			}
+			
+			if (compound.getType().equals("zout")) {
+				questionTypes.add("MolMolarityIons");
+				questionTypes.add("MolarityIonsMol");
+				questionTypes.add("MolarityIonsMass");
 			}
 				
 			if (compound.getPhase().equals("g")) { //These questions only make sense for gasses at 298 K
@@ -110,8 +122,14 @@ public class Question {
 		case "MolMolarity":
 			this.createMolMolarity(seed);
 			break;
+		case "MolMolarityIons":
+			this.createMolMolarityIons(seed);
+			break;
 		case "MolarityMol":
 			this.createMolarityMol(seed);
+			break;
+		case "MolarityIonsMol":
+			this.createMolarityIonsMol(seed);
 			break;
 		case "MolarityVolume":
 			this.createMolarityVolume(seed);
@@ -145,6 +163,12 @@ public class Question {
 		case "VolumeMass":
 			this.createVolumeMass(seed);
 			break;
+		case "MolarityMass":
+			this.createMolarityMass(seed);
+			break;
+		case "MolarityIonsMass":
+			this.createMolarityIonsMass(seed);
+			break;
 		default:
 			System.out.println("Invalid question type in Question(String, long, Compound) constructor");
 		}
@@ -159,14 +183,12 @@ public class Question {
 				mass.toPlainString(), 
 				compound.getHtmlFormula());
 
-		//Molar mass is saved with too many characters after the decimal point
-		//That's not what should be printed in the answer key. The answer key must have fourDigit precision.
-		BigDecimal molarMass = new BigDecimal(compound.getMolarMass().toPlainString(), fourDigit); 
 		
 		// mass to moles: divide the mass by the molar mass
-		BigDecimal mol = mass.divide(molarMass, threeDigit);
+		BigDecimal mol = mass.divide(compound.getMolarMass(), threeDigit);
 		this.answerKeyString = String.format("%s g / %s g/mol = %s mol %s", 
-				mass.toPlainString(), molarMass.toPlainString(), 
+				mass.toPlainString(), 
+				compound.getMolarMass().round(fourDigit).toPlainString(), 
 				mol.toPlainString(), compound.getHtmlFormula());	
 	}
 	
@@ -178,14 +200,11 @@ public class Question {
 				mol.toPlainString(), 
 				compound.getHtmlFormula());
 		
-		//Molar mass is saved with too many characters after the decimal point
-		//That's not what should be printed in the answer key. That should work with fourDigit precision
-		BigDecimal molarMass = new BigDecimal(compound.getMolarMass().toPlainString(), fourDigit); 
-		
 		// moles to mass: multiply moles by molar mass
-		BigDecimal mass = mol.multiply(molarMass, threeDigit);
+		BigDecimal mass = mol.multiply(compound.getMolarMass(), threeDigit);
 		this.answerKeyString = String.format("%s mol x %s g/mol = %s gram %s", 
-				mol.toPlainString(), molarMass.toPlainString(), 
+				mol.toPlainString(), 
+				compound.getMolarMass().round(fourDigit).toPlainString(), 
 				mass.toPlainString(), compound.getHtmlFormula());
 	}
 	
@@ -209,6 +228,43 @@ public class Question {
 				molarity.toPlainString());
 	}
 	
+	private void createMolMolarityIons (long seed) {
+		int factorMole = 2;
+		int factorVolume = 10;
+		
+		BigDecimal volume = new BigDecimal(seededRandomNums.nextDouble()*factorVolume, threeDigit);
+		BigDecimal mol = new BigDecimal(seededRandomNums.nextDouble()*factorMole, threeDigit);
+		
+		//Grab composition code in the form "X:3, Y:1, Z:1", split, and randomly select an ion
+		String composition = compound.getComposition();
+		String[] ions = composition.split(",");
+		int ionIndex = (int) Math.floor(seededRandomNums.nextDouble()*ions.length);
+		String[] atom = ions[ionIndex].trim().split(":");
+		String symbol = atom[0];
+		BigDecimal coefficient = new BigDecimal(atom[1]);
+		
+		//Finish the question asking for the selected atom or ion		
+		this.questionText = String.format("Bereken [%s] als %s mol %s word opgelost in %s L oplosmiddel.",
+				symbol,
+				mol.toPlainString(), 
+				compound.getHtmlFormula(), 
+				volume.toPlainString());
+		
+		// moles to molarity ion: divide moles by volume and multiply by the coefficient
+		BigDecimal molIons = mol.multiply(coefficient, fourDigit);
+		BigDecimal molarity = molIons.divide(volume, threeDigit).multiply(coefficient, threeDigit);
+		this.answerKeyString = String.format("%s mol %s x %s = %s mol %s-ionen </br>&nbsp;&nbsp; [%s] = %s mol / %s L = %s M", 
+				mol.toPlainString(),
+				compound.getHtmlFormula(),
+				coefficient.toPlainString(),
+				molIons.toPlainString(),
+				symbol,
+				symbol,
+				molIons.toPlainString(),
+				volume.toPlainString(),
+				molarity.toPlainString());
+	}
+	
 	private void createMolarityMol(long seed) {
 		int factorVolume =12;
 		double factorMolarity = 1.5;
@@ -228,6 +284,42 @@ public class Question {
 				volume.toPlainString(), 
 				mol.toPlainString(), 
 				compound.getName());
+	}
+	
+	private void createMolarityIonsMol (long seed) {
+		int factorVolume = 12;
+		int factorMolarity = 2;
+		
+		BigDecimal volume = new BigDecimal(seededRandomNums.nextDouble()*factorVolume, threeDigit);
+		BigDecimal molarity = new BigDecimal(seededRandomNums.nextDouble()*factorMolarity, twoDigit);
+		
+		//Grab composition code in the form "X:3, Y:1, Z:1", split, and randomly select an ion
+		String composition = compound.getComposition();
+		String[] ions = composition.split(",");
+		int ionIndex = (int) Math.floor(seededRandomNums.nextDouble()*ions.length);
+		String[] atom = ions[ionIndex].trim().split(":");
+		String symbol = atom[0];
+		BigDecimal coefficient = new BigDecimal(atom[1]);
+		
+		//Finish the question given the concentration of a certain ion	
+		this.questionText = String.format("Bereken hoeveel mol %s nodig is om %s L oplossing te maken met [%s]=%s M",
+				compound.getHtmlFormula(),
+				volume.toPlainString(),
+				symbol,
+				molarity.toPlainString());
+		
+		//Molarity ions to mol: multiply molarity by volume for mol ions. Then divide by coefficient for mol salt.
+		BigDecimal molIons = molarity.multiply(volume, threeDigit);
+		BigDecimal molSalt = molIons.divide(coefficient, twoDigit);		
+		this.answerKeyString = String.format("%s M x %s L = %s mol %s-ionen </br>&nbsp;&nbsp; %s mol / %s = %s mol %s", 
+				molarity.toPlainString(),
+				volume.toPlainString(),
+				molIons.toPlainString(),
+				symbol,
+				molIons.toPlainString(),
+				coefficient.toPlainString(),
+				molSalt.toPlainString(),
+				compound.getHtmlFormula());
 	}
 	
 	private void createMolarityVolume(long seed) {
@@ -533,6 +625,81 @@ public class Question {
 		this.answerKeyString = unitConversion + baseUnitCalc;
 	}
 	
+	public void createMolarityMass(long seed) {
+		int factorVolume =12;
+		double factorMolarity = 1.5;
+		
+		BigDecimal volume = new BigDecimal(seededRandomNums.nextDouble()*factorVolume, threeDigit);
+		BigDecimal molarity = new BigDecimal(seededRandomNums.nextDouble()*factorMolarity, twoDigit);
+		
+		this.questionText = String.format("Bereken hoeveel gram %s nodig is voor %s L oplossing van %s M", 
+				compound.getName(), 
+				volume.toPlainString(), 
+				molarity.toPlainString());
+		
+		// Step 1: molarity to mol: multiply molarity by volume
+		// Step 2: mol to mass: multiply mol by molar mass
+		BigDecimal mol = molarity.multiply(volume, threeDigit);
+		BigDecimal mass = mol.multiply(compound.getMolarMass(), twoDigit);
+		String step1 = String.format("%s M x %s L = %s mol %s", 
+				molarity.toPlainString(), 
+				volume.toPlainString(), 
+				mol.toPlainString(), 
+				compound.getName());
+		String step2 = String.format("%s mol x %s g/mol = %s g %s",
+				mol.toPlainString(),
+				compound.getMolarMass().round(fourDigit).toPlainString(),
+				mass.toString().replace("E+", "x10<sup>").concat("</sup>"),
+				compound.getName());
+		this.answerKeyString = step1 + "</br>&nbsp;&nbsp;" + step2;
+	}
+	
+	public void createMolarityIonsMass (long seed) {
+		int factorVolume =12;
+		double factorMolarity = 0.9;
+		
+		BigDecimal volume = new BigDecimal(seededRandomNums.nextDouble()*factorVolume, threeDigit);
+		BigDecimal molarity = new BigDecimal(seededRandomNums.nextDouble()*factorMolarity, twoDigit);
+		
+		//Grab composition code in the form "X:3, Y:1, Z:1", split, and randomly select an ion
+		String composition = compound.getComposition();
+		String[] ions = composition.split(",");
+		int ionIndex = (int) Math.floor(seededRandomNums.nextDouble()*ions.length);
+		String[] atom = ions[ionIndex].trim().split(":");
+		String symbol = atom[0];
+		BigDecimal coefficient = new BigDecimal(atom[1]);
+		
+		//Finish the question given the concentration of a certain ion	
+		this.questionText = String.format("Bereken hoeveel gram %s nodig is om %s L oplossing te maken met [%s]=%s M",
+				compound.getHtmlFormula(),
+				volume.toPlainString(),
+				symbol,
+				molarity.toPlainString());
+		
+		// Step 1: molarity to mol ions: multiply molarity by volume
+		// Step 2: mol ions to mol salt: divide by coefficient
+		// Step 3: mol salt to mass: multiply mol by molar mass
+		BigDecimal molIons = molarity.multiply(volume, threeDigit);
+		BigDecimal molSalt = molIons.divide(coefficient, threeDigit);
+		BigDecimal mass = molSalt.multiply(compound.getMolarMass(), twoDigit);
+		String step1 = String.format("%s M x %s L = %s mol %s-ionen", 
+				molarity.toPlainString(), 
+				volume.toPlainString(), 
+				molIons.toPlainString(), 
+				symbol);
+		String step2 = String.format("%s mol / %s = %s mol %s", 
+				molIons.toPlainString(),
+				coefficient.toPlainString(),
+				molSalt.toPlainString(),
+				compound.getHtmlFormula());
+		String step3 = String.format("%s mol x %s g/mol = %s g %s",
+				molSalt.toPlainString(),
+				compound.getMolarMass().round(fourDigit).toPlainString(),
+				mass.toString().replace("E+", "x10<sup>").concat("</sup>"),
+				compound.getName());
+		String newLine = "</br>&nbsp;&nbsp;";
+		this.answerKeyString = step1 + newLine + step2 + newLine + step3;
+	}
 	
 
 	public String getQuestionText() {
