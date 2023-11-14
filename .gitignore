@@ -33,3 +33,6 @@ build/
 ### VS Code ###
 .vscode/
 /bin/
+
+### Local Application Settings ###
+application-local.properties
