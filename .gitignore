@@ -36,3 +36,4 @@ build/
 
 ### Local Application Settings ###
 application-local.properties
+application.properties
