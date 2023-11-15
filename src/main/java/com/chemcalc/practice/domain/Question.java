@@ -40,30 +40,38 @@ public class Question {
 		 * 		Mol to mass (any compound)
 		 * 		Mass to mol (any compound)
 		 * 		Mol to particles (any compound)
+		 * 		Particles to mol (any non-salt)
 		 * 		Mol to molarity (any non-metal except water)
 		 * 		Molarity to mol (any non-metal except water)
 		 * 		Mol salt to molarity ions (any salt) 
 		 * 		Molarity of ions to mol salt (any salt)
 		 * 		Molarity to volume required (any non-metal, except water)
-		 * 		Particles to mol (any non-salt)
-		 * 		Mol to gas volume (any gas)
-		 * 		Gas volume to mol (any gas)
-		 * 		Mass to volume (any non-gas with a density)
-		 * 		Volume to mass (any non-gas with a density)
+		 * 		Mol to volume gas at 298 K (any gas)
+		 * 		Volume gas to mol at 298 K (any gas)
+		 * 		Mass to volume at 273 K (any non-gas with a density)
+		 * 		Volume to mass at 273 K (any non-gas with a density)
 		 * 
 		 * "multi-step" questions:
 		 * 		Molarity to mass (any molecular compound except water)
+		 * 		Mass to molarity (any molecular compound except water)
 		 * 		Molarity of ions to mass of salt (any salt)
-		 * 		Mass to molarity (any molecular compound except water) 
 		 * 		Mass of salt to molarity ions (any salt)
-		 * 		Mass to particles (any compound) TODO
-		 * 		Mass to volume gas (any gas at 295 K) TODO 
-		 * 		Particles to mass (any non-salt) TODO
-		 * 		Volume to mol (any non-gas with a density) TODO
-		 * 		Mol to volume (any non-gas with a density) TODO 
-		 * 		Particles to molarity (???) TODO 
-		 * 		Molarity to particles (???) TODO 
+		 * 		Mass to particles (any compound)
+		 * 		Particles to mass (any non-salt)
+		 * 		Mass to volume gas at 298 K(any gas) TODO 
+		 * 		Volume gas to mass at 298 K(any gas) TODO
 		 * 
+		 * What questions do not exist?
+		 * 		Number of ions to mol or mass of a salt, and equivalent, the number of atoms
+		 * 		to mol or mass of a molecule. It would add a lot of work
+		 * 		for relatively little educational benefit. These questions are a rarity, even 
+		 * 		in the chapters that cover them.
+		 * 		
+		 * 		Number of particles (ions or molecules) in solution to molarity, and vise versa.
+		 * 		This adds yet another avogadro-involved question type. These are less important
+		 * 		than other question types that involve multiple steps. Adding these two question 
+		 * 		types would add quite some work for little educational value. Especially late 
+		 * 		4th year and beyond, calculating number of particles is virtually never asked of students.
 		 */
 		
 		this.compound = compound;
@@ -79,6 +87,7 @@ public class Question {
 			questionTypes.add("MolMass");
 			questionTypes.add("MassMol");
 			questionTypes.add("MolParticles"); // Selects different questions in the switch below based on compound type!
+			questionTypes.add("MassParticles"); //Selects different questions in the switch below based on compound type!
 				
 			if (!compound.getType().equals("metaal") && !compound.getName().equals("water")) {
 				//These question types are invalid for metals, in the DB type "metaal"
@@ -98,6 +107,7 @@ public class Question {
 				
 			if (!compound.getType().equals("zout")) {
 				questionTypes.add("ParticlesMol");
+				questionTypes.add("ParticlesMass");
 			}
 			
 			if (compound.getType().equals("zout")) {
@@ -110,6 +120,8 @@ public class Question {
 			if (compound.getPhase().equals("g")) { //These questions only make sense for gasses at 298 K
 				questionTypes.add("MolGas");
 				questionTypes.add("GasMol"); 
+				questionTypes.add("MassGas");
+				questionTypes.add("GasMass");
 			} else if (compound.getDensity().intValue() != 0) { 
 				//Not a gas means mass to volume makes sense at 273 K. 
 				//Not all compounds have a listed density, so check it's not zero.
@@ -183,6 +195,29 @@ public class Question {
 			break;
 		case "MassMolarityIons":
 			this.createMassMolarityIons(seed);
+			break;
+		case "MassParticles":
+			if (compound.getType().equals("metaal")) {
+				this.createMassAtomsMetal(seed);
+				break;
+			} if (compound.getType().equals("zout")) {
+				this.createMassAtomsMolecule(seed); //question is so similar these are the same method as molecules
+				break;
+			} if (compound.getType().equals("moleculair") && questionSelection.nextDouble() < 0.5) {
+				this.createMassAtomsMolecule(seed);
+				break;
+			} else {
+				this.createMassMolecules(seed);
+				break;
+			}
+		case "ParticlesMass":
+			this.createParticlesMass(seed);
+			break;
+		case "MassGas":
+			this.createMassGas(seed);
+			break;
+		case "GasMass":
+			this.createGasMass(seed);
 			break;
 		default:
 			System.out.println("Invalid question type in Question(String, long, Compound) constructor");
@@ -386,13 +421,11 @@ public class Question {
 		BigDecimal coefficient = new BigDecimal(atom[1]);
 		
 		//Finish the question asking for the selected atom or ion
-		this.questionText = String.format("Bereken hoeveel %s-atomen %s mol %s bevat", 
-				symbol, 
+		this.questionText = String.format("Bereken hoeveel %s-%s %s mol %s bevat", 
+				symbol,
+				(compound.getType().equals("zout")) ? "ionen" : "atomen",
 				mol.toPlainString(), 
 				compound.getHtmlFormula());
-		if (compound.getType().equals("zout")) {
-			this.questionText = this.questionText.replace("atomen", "ionen");
-		}
 		
 		//mol to atoms: multiply by avogadro and the atom or ion coefficient
 		BigDecimal molecules = mol.multiply(avogadro, fourDigit);
@@ -797,6 +830,163 @@ public class Question {
 				molarity.toPlainString());
 		this.answerKeyString = step1 + lineBreak + step2 + lineBreak + step3;
 	}
+	
+	private void createMassAtomsMetal (long seed) {
+		int factorMol = 3;
+		
+		BigDecimal mol = new BigDecimal(seededRandomNums.nextDouble()*factorMol, fourDigit);
+		BigDecimal mass = mol.multiply(compound.getMolarMass(), threeDigit);
+		BigDecimal numberAtoms = mol.multiply(avogadro, threeDigit);
+		
+		this.questionText = String.format("Bereken hoeveel %s-atomen %s gram %s bevat", 
+				compound.getHtmlFormula(), 
+				mass.toPlainString(), 
+				compound.getName());
+		
+		//Step 1: mass to mol: divide mass by molar mass
+		//Step 2: mol to atoms: multiply by avogadro
+		String step1 = String.format("%s g / %s g/mol = %s mol %s",
+				mass.toPlainString(),
+				compound.getMolarMass().round(fourDigit).toPlainString(),
+				mol.toPlainString(),
+				compound.getHtmlFormula());
+		String step2 = String.format("%s mol x N<sub>A</sub> = %s x %s = %s %s-atomen",
+				mol.toPlainString(),
+				mol.toPlainString(),
+				avogadro.toString().replace("E+23", "x10<sup>23</sup>"),
+				numberAtoms.toString().replace("E+", "x10<sup>").concat("</sup>"),
+				compound.getHtmlFormula());
+		
+		this.answerKeyString = step1 + lineBreak + step2;
+	}
+	
+	public void createMassAtomsMolecule (long seed) {
+		double factorMol = 1.3;
+		
+		BigDecimal mol = new BigDecimal(seededRandomNums.nextDouble()*factorMol, fourDigit);
+		BigDecimal mass = mol.multiply(compound.getMolarMass(), threeDigit);
+		
+		//Grab composition code in the form "X:3, Y:1, Z:1", split, and randomly select an atom or ion
+		String composition = compound.getComposition();
+		String[] atoms = composition.split(",");
+		int atomIndex = (int) Math.floor(seededRandomNums.nextDouble()*atoms.length);
+		String[] atom = atoms[atomIndex].trim().split(":");
+		String symbol = atom[0];
+		BigDecimal coefficient = new BigDecimal(atom[1]);
+		
+		//Finish the question asking for the selected atom or ion
+		this.questionText = String.format("Bereken hoeveel %s-atomen %s gram %s bevat", 
+				symbol,
+				mass.toPlainString(), 
+				compound.getHtmlFormula());
+		
+		//Step 1: mass to mol: divide mass by molar mass
+		//Step 2: mol to ions/atoms: multiply mol compound by coefficient
+		//Step 3: mol ions/atoms to atoms: multiply by avogadro
+		BigDecimal molecules = mol.multiply(avogadro, fourDigit);
+		BigDecimal molAtoms = mol.multiply(coefficient, threeDigit);
+		BigDecimal numberAtoms = molecules.multiply(coefficient, threeDigit);
+
+		String step1 = String.format("%s g / %s g/mol = %s mol %s",
+				mass.toPlainString(),
+				compound.getMolarMass().round(fourDigit).toPlainString(),
+				mol.toPlainString(),
+				compound.getHtmlFormula());
+		String step2 = String.format("%s mol %s x %s = %s mol %s-atomen",
+				mol.toPlainString(),
+				compound.getHtmlFormula(),
+				coefficient.toPlainString(),
+				molAtoms.toPlainString(),
+				symbol);
+		String step3 = String.format("%s mol x N<sub>A</sub> = %s mol x %s = %s %s-atomen",
+				molAtoms.toPlainString(),
+				molAtoms.toPlainString(),
+				avogadro.toString().replace("E+23", "x10<sup>23</sup>"),
+				numberAtoms.toString().replace("E+", "x10<sup>").concat("</sup>"),
+				symbol);
+			
+		this.answerKeyString = step1 + lineBreak + step2 + lineBreak + step3;
+			
+		if (compound.getType().equals("zout")) {
+			this.questionText = this.questionText.replace("atomen", "ionen");
+			this.answerKeyString = this.answerKeyString.replace("atomen", "ionen");
+		}
+	}
+	
+	public void createMassMolecules (long seed) {
+		int factorMol = 4;
+		
+		BigDecimal mol = new BigDecimal(seededRandomNums.nextDouble()*factorMol, fourDigit);
+		BigDecimal mass = mol.multiply(compound.getMolarMass(), threeDigit);
+		BigDecimal molecules = mol.multiply(avogadro, threeDigit);
+		
+		this.questionText = String.format("Bereken hoeveel %s-moleculen %s gram %s bevat", 
+				compound.getHtmlFormula(), 
+				mass.toPlainString(), 
+				compound.getName());
+		
+		//Step 1: mass to mol: divide mass by molar mass
+		//Step 2: mol to molecules: multiply by avogadro
+		String step1 = String.format("%s g / %s g/mol = %s mol %s",
+				mass.toPlainString(),
+				compound.getMolarMass().round(fourDigit).toPlainString(),
+				mol.toPlainString(),
+				compound.getHtmlFormula());
+		String step2 = String.format("%s mol x N<sub>A</sub> = %s x %s = %s %s-moleculen",
+				mol.toPlainString(),
+				mol.toPlainString(),
+				avogadro.toString().replace("E+23", "x10<sup>23</sup>"),
+				molecules.toString().replace("E+", "x10<sup>").concat("</sup>"),
+				compound.getHtmlFormula());
+		
+		this.answerKeyString = step1 + lineBreak + step2;
+	}
+	
+	public void createParticlesMass (long seed) {
+		int factorMol = 3;
+		
+		BigDecimal mol = new BigDecimal(seededRandomNums.nextDouble()*factorMol, fourDigit);
+		BigDecimal mass = mol.multiply(compound.getMolarMass(), threeDigit);
+		BigDecimal particles = mol.multiply(avogadro, threeDigit);
+		
+		this.questionText = String.format("Bereken de massa van %s %s-moleculen", //replace to "atomen" later if molecular compound
+				particles.toString().replace("E+", "x10<sup>").concat("</sup>"),
+				compound.getHtmlFormula());
+		
+		//Step 1: particles to mol: divide by avogadro
+		//Step 2: mol to mass: mulitply by molar mass
+		String step1 = String.format("%s moleculen / N<sub>A</sub> = %s / %s = %s mol",
+				particles.toString().replace("E+", "x10<sup>").concat("</sup>"),
+				particles.toString().replace("E+", "x10<sup>").concat("</sup>"),
+				avogadro.toString().replace("E+23", "x10<sup>23</sup>"),
+				mol.toPlainString());
+		String step2 = String.format("%s mol x %s g/mol = %s g %s",
+				mol.toPlainString(),
+				compound.getMolarMass().round(fourDigit).toPlainString(),
+				mass.toPlainString(),
+				compound.getHtmlFormula());
+		
+		this.answerKeyString = step1 + lineBreak + step2;
+	
+		// To check, grab the composition, split it, and check the coefficient. There should be only one
+		// component, and the coefficient is 1 for all metals and mono-atomic molecular compounds.
+		// If it is mono-atomic or a metal, 'molecules' should change to 'atoms'.
+		String[] components = compound.getComposition().split(",");
+		char coefficient = components[0].charAt(components[0].length()-1); // This does not account for double-digit coefficients. 
+		if (components.length == 1 && coefficient == '1') {
+			this.questionText = this.questionText.replace("moleculen", "atomen");
+			this.answerKeyString = this.answerKeyString.replace("moleculen", "atomen");
+		}		
+	}
+	
+	public void createMassGas (long seed) {
+		//TODO
+	}
+	
+	public void createGasMass (long seed) {
+		//TODO
+	}
+	
 
 	public String getQuestionText() {
 		return questionText;
