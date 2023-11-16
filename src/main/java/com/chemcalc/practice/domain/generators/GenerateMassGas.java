@@ -4,19 +4,19 @@ import java.math.BigDecimal;
 import java.util.Random;
 
 import com.chemcalc.practice.domain.Compound;
+import com.chemcalc.practice.domain.Question;
 
-public class generateMassGas implements Constants{
-	//Private constructor since this will only contain static methods
-	//Instantiation by client code is forbidden
-	private generateMassGas() {};
+public class GenerateMassGas implements Constants{
+	private GenerateMassGas() {};
 	
-	static public String[] createMassGas(Random seededRandomNums, Compound compound) {
+	static public Question create(long subseed, Compound compound) {
 		int factorMol = 8;
+		Random localRandomNums = new Random(subseed);
 		
-		BigDecimal mol = new BigDecimal(seededRandomNums.nextDouble()*factorMol, fourDigit);
+		BigDecimal mol = new BigDecimal(localRandomNums.nextDouble()*factorMol, fourDigit);
 		BigDecimal mass = mol.multiply(compound.getMolarMass(), threeDigit);
 		
-		String question = String.format("Bereken het volume (in m<sup>3</sup>) van %s gram %s (g) bij 298 K",
+		String text = String.format("Bereken het volume (in m<sup>3</sup>) van %s gram %s (g) bij 298 K",
 				mass.toPlainString(), 
 				compound.getHtmlFormula());
 		
@@ -37,7 +37,6 @@ public class generateMassGas implements Constants{
 		
 		String answer = step1 + lineBreak + step2;
 		
-		String[] questionContent = {question, answer};
-		return questionContent;
+		return new Question(text, answer);
 	}
 }

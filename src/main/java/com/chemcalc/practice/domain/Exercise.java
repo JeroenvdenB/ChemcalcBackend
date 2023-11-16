@@ -4,31 +4,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.chemcalc.practice.domain.generators.generateGasMass;
-import com.chemcalc.practice.domain.generators.generateMassGas;
+import com.chemcalc.practice.domain.generators.GenerateGasMass;
+import com.chemcalc.practice.domain.generators.GenerateMassGas;
+import com.chemcalc.practice.domain.generators.GenerateMassMolarity;
+import com.chemcalc.practice.domain.generators.GenerateMassMolarityIons;
+import com.chemcalc.practice.domain.generators.GenerateMassParticles;
+import com.chemcalc.practice.domain.generators.GenerateMassVolume;
+import com.chemcalc.practice.domain.generators.GenerateMolarityIonsMass;
+import com.chemcalc.practice.domain.generators.GenerateMolarityMass;
+import com.chemcalc.practice.domain.generators.GenerateParticlesMass;
+import com.chemcalc.practice.domain.generators.GenerateVolumeMass;
 
 public class Exercise {
 	
-	private String questionType;
+	private String exerciseType;
 	private int repetitions;
 	private long seed;
 	private ArrayList<Question> questionsList = new ArrayList<Question>();
 	
-	public Exercise (String questionType, int repetitions, long seed) {
-		this.questionType = questionType;
+	public Exercise (String exerciseType, int repetitions, long seed) {
+		this.exerciseType = exerciseType;
 		this.repetitions = repetitions;
 		this.seed = seed;
 	}
 
-	public void createQuestions(List<Compound> compounds) {
-		Random subSeeds = new Random(seed);
-		for(Compound compound : compounds) {
-			long subseed = subSeeds.nextLong();
-			Question q = new Question(questionType, subseed, compound);
-			questionsList.add(q);
-		}
-	}
-	
 	public void fillQuestionsList(List<Compound> compounds) {
 		// Set a subseed, so that each question gets a unique seed from this Random object
 		// Keeping the source (this Random object) seeded ensures reproducibility.
@@ -36,114 +35,103 @@ public class Exercise {
 		
 		for (Compound compound: compounds) {
 			long subseed = questionSeeds.nextLong();
+			String questionType = exerciseType;
 			
 			// If question type is random, determine what the type should be
-			if (questionType.equals("Random")) {
+			if (exerciseType.equals("Random")) {
 				questionType = chooseQuestionType(subseed, compound);
+				System.out.println("Random question detected");
 			}
 			
-			String foo = createQuestion(questionType, subseed, compound);
-			// Question question = createQuestion(questionType, subseed, compound);
-			// questionsList.add(question);
+			Question question = createQuestion(questionType, subseed, compound);
+			questionsList.add(question);
 		}
 	}
 	
-	public String createQuestion(String questionType, long subseed, Compound compound) {
+	public Question createQuestion(String questionType, long subseed, Compound compound) {
+		
+		Question question = new Question("Oeps, er ging iets verkeerd...", "Geen antwoord gegenereerd");
+		
 		switch(questionType) {
-		case "MassMol":
-			this.createMassMol(seed);
-			break;
-		case "MolMass":
-			this.createMolMass(seed);
-			break;
-		case "MolMolarity":
-			this.createMolMolarity(seed);
-			break;
-		case "MolMolarityIons":
-			this.createMolMolarityIons(seed);
-			break;
-		case "MolarityMol":
-			this.createMolarityMol(seed);
-			break;
-		case "MolarityIonsMol":
-			this.createMolarityIonsMol(seed);
-			break;
-		case "MolarityVolume":
-			this.createMolarityVolume(seed);
-			break;
-		case "MolParticles":
-			if (compound.getType().equals("metaal")) {
-				this.createMolAtomsMetal(seed);
-				break;
-			} if (compound.getType().equals("zout")) {
-				this.createMolAtomsMolecule(seed); //question is so similar these are the same method as molecules
-				break;
-			} if (compound.getType().equals("moleculair") && questionSelection.nextDouble() < 0.5) {
-				this.createMolAtomsMolecule(seed);
-				break;
-			} else {
-				this.createMolMolecules(seed);
-				break;
-			}
-		case "ParticlesMol":
-			this.createParticlesMol(seed);
-			break;
-		case "MolGas":
-			this.createMolGas(seed);
-			break;
-		case "GasMol":
-			this.createGasMol(seed);
-			break;
+//		case "MassMol":
+//			this.createMassMol(seed);
+//			break;
+//		case "MolMass":
+//			this.createMolMass(seed);
+//			break;
+//		case "MolMolarity":
+//			this.createMolMolarity(seed);
+//			break;
+//		case "MolMolarityIons":
+//			this.createMolMolarityIons(seed);
+//			break;
+//		case "MolarityMol":
+//			this.createMolarityMol(seed);
+//			break;
+//		case "MolarityIonsMol":
+//			this.createMolarityIonsMol(seed);
+//			break;
+//		case "MolarityVolume":
+//			this.createMolarityVolume(seed);
+//			break;
+//		case "MolParticles":
+//			if (compound.getType().equals("metaal")) {
+//				this.createMolAtomsMetal(seed);
+//				break;
+//			} if (compound.getType().equals("zout")) {
+//				this.createMolAtomsMolecule(seed); //question is so similar these are the same method as molecules
+//				break;
+//			} if (compound.getType().equals("moleculair") && questionSelection.nextDouble() < 0.5) {
+//				this.createMolAtomsMolecule(seed);
+//				break;
+//			} else {
+//				this.createMolMolecules(seed);
+//				break;
+//			}
+//		case "ParticlesMol":
+//			this.createParticlesMol(seed);
+//			break;
+//		case "MolGas":
+//			this.createMolGas(seed);
+//			break;
+//		case "GasMol":
+//			this.createGasMol(seed);
+//			break;
 		case "MassVolume":
-			this.createMassVolume(seed);
+			question = GenerateMassVolume.create(subseed, compound);
 			break;
 		case "VolumeMass":
-			this.createVolumeMass(seed);
+			question = GenerateVolumeMass.create(subseed, compound);
 			break;
 		case "MolarityMass":
-			this.createMolarityMass(seed);
+			question = GenerateMolarityMass.create(subseed, compound);
 			break;
 		case "MolarityIonsMass":
-			this.createMolarityIonsMass(seed);
+			question = GenerateMolarityIonsMass.create(subseed, compound);
 			break;
 		case "MassMolarity":
-			this.createMassMolarity(seed);
+			question = GenerateMassMolarity.create(subseed, compound);
 			break;
 		case "MassMolarityIons":
-			this.createMassMolarityIons(seed);
+			question = GenerateMassMolarityIons.create(subseed, compound);
 			break;
 		case "MassParticles":
-			if (compound.getType().equals("metaal")) {
-				this.createMassAtomsMetal(seed);
-				break;
-			} if (compound.getType().equals("zout")) {
-				this.createMassAtomsMolecule(seed); //question is so similar these are the same method as molecules
-				break;
-			} if (compound.getType().equals("moleculair") && questionSelection.nextDouble() < 0.5) {
-				this.createMassAtomsMolecule(seed);
-				break;
-			} else {
-				this.createMassMolecules(seed);
-				break;
-			}
+			question = GenerateMassParticles.create(subseed, compound);
+			break;
 		case "ParticlesMass":
-			this.createParticlesMass(seed);
+			question = GenerateParticlesMass.create(subseed, compound);
 			break;
 		case "MassGas":
-			questionContent = generateMassGas.createMassGas(seededRandomNums, compound);
-			this.questionText = questionContent[0];
-			this.answerKeyString = questionContent[1];
+			question = GenerateMassGas.create(subseed, compound);
 			break;
 		case "GasMass":
-			Question question = generateGasMass.create(seededRandomNums, compound);
-			this.questionText = questionContent[0];
-			this.answerKeyString = questionContent[1];
+			question = GenerateGasMass.create(subseed, compound);
 			break;
 		default:
-			System.out.println("Invalid question type in Question(String, long, Compound) constructor");
+			System.out.println("Invalid question type in Exercise -> createQuestion method.");
 		}
-	}
-		return "bar";
+	
+		return question;
 	}
 	
 	public String chooseQuestionType(long subseed, Compound compound) {
@@ -196,13 +184,13 @@ public class Exercise {
 		
 		return questionTypes.get(j);
 	}
-	
-	public String getQuestionType() {
-		return questionType;
+
+	public String getExerciseType() {
+		return exerciseType;
 	}
 
-	public void setQuestionType(String questionType) {
-		this.questionType = questionType;
+	public void setExerciseType(String exerciseType) {
+		this.exerciseType = exerciseType;
 	}
 
 	public int getRepetitions() {
@@ -228,5 +216,5 @@ public class Exercise {
 	public void setQuestionsList(ArrayList<Question> questionsList) {
 		this.questionsList = questionsList;
 	}
-
+	
 }

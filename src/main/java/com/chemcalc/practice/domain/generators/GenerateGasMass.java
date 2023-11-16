@@ -6,12 +6,12 @@ import java.util.Random;
 import com.chemcalc.practice.domain.Compound;
 import com.chemcalc.practice.domain.Question;
 
-public class generateGasMass implements Constants {
-	private generateGasMass() {};
+public class GenerateGasMass implements Constants {
+	private GenerateGasMass() {};
 	
 	static public Question create(long subseed, Compound compound) {
-		int factorVolume = 40;
 		Random localRandomNums = new Random(subseed);
+		int factorVolume = 40;
 		
 		BigDecimal volume = new BigDecimal(localRandomNums.nextDouble()*factorVolume, threeDigit);
 		
