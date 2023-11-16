@@ -6,6 +6,9 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Random;
 
+import com.chemcalc.practice.domain.generators.generateGasMass;
+import com.chemcalc.practice.domain.generators.generateMassGas;
+
 public class Question {
 	
 	private Compound compound;			//argument for the Question constructor. Gets set in constructor.
@@ -58,8 +61,8 @@ public class Question {
 		 * 		Mass of salt to molarity ions (any salt)
 		 * 		Mass to particles (any compound)
 		 * 		Particles to mass (any non-salt)
-		 * 		Mass to volume gas at 298 K(any gas) TODO 
-		 * 		Volume gas to mass at 298 K(any gas) TODO
+		 * 		Mass to volume gas at 298 K (any gas) 
+		 * 		Volume gas to mass at 298 K (any gas)
 		 * 
 		 * What questions do not exist?
 		 * 		Number of ions to mol or mass of a salt, and equivalent, the number of atoms
@@ -77,7 +80,7 @@ public class Question {
 		this.compound = compound;
 		this.seededRandomNums = new Random(seed);
 		
-		//random question selection if questionType is "Random"
+		// random question selection if questionType is "Random"
 		// can't use seededRandomNums - messes with reproducibility because the amount of numbers used from the stream
 		Random questionSelection = new Random(seed); 
 		
@@ -132,6 +135,8 @@ public class Question {
 			int r = questionSelection.nextInt(questionTypes.size());
 			questionType = questionTypes.get(r);							
 		}
+		
+		String[] questionContent;
 		
 		switch(questionType) {
 		case "MassMol":
@@ -214,10 +219,14 @@ public class Question {
 			this.createParticlesMass(seed);
 			break;
 		case "MassGas":
-			this.createMassGas(seed);
+			questionContent = generateMassGas.createMassGas(seededRandomNums, compound);
+			this.questionText = questionContent[0];
+			this.answerKeyString = questionContent[1];
 			break;
 		case "GasMass":
-			this.createGasMass(seed);
+			questionContent = generateGasMass.createGasMass(seededRandomNums, compound);
+			this.questionText = questionContent[0];
+			this.answerKeyString = questionContent[1];
 			break;
 		default:
 			System.out.println("Invalid question type in Question(String, long, Compound) constructor");
@@ -977,16 +986,7 @@ public class Question {
 			this.questionText = this.questionText.replace("moleculen", "atomen");
 			this.answerKeyString = this.answerKeyString.replace("moleculen", "atomen");
 		}		
-	}
-	
-	public void createMassGas (long seed) {
-		//TODO
-	}
-	
-	public void createGasMass (long seed) {
-		//TODO
-	}
-	
+	}	
 
 	public String getQuestionText() {
 		return questionText;
