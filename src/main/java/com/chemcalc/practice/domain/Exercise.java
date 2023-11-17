@@ -5,14 +5,20 @@ import java.util.List;
 import java.util.Random;
 
 import com.chemcalc.practice.domain.generators.GenerateGasMass;
+import com.chemcalc.practice.domain.generators.GenerateGasMol;
 import com.chemcalc.practice.domain.generators.GenerateMassGas;
 import com.chemcalc.practice.domain.generators.GenerateMassMolarity;
 import com.chemcalc.practice.domain.generators.GenerateMassMolarityIons;
 import com.chemcalc.practice.domain.generators.GenerateMassParticles;
 import com.chemcalc.practice.domain.generators.GenerateMassVolume;
+import com.chemcalc.practice.domain.generators.GenerateMolGas;
+import com.chemcalc.practice.domain.generators.GenerateMolParticles;
 import com.chemcalc.practice.domain.generators.GenerateMolarityIonsMass;
+import com.chemcalc.practice.domain.generators.GenerateMolarityIonsMol;
 import com.chemcalc.practice.domain.generators.GenerateMolarityMass;
+import com.chemcalc.practice.domain.generators.GenerateMolarityVolume;
 import com.chemcalc.practice.domain.generators.GenerateParticlesMass;
+import com.chemcalc.practice.domain.generators.GenerateParticlesMol;
 import com.chemcalc.practice.domain.generators.GenerateVolumeMass;
 
 public class Exercise {
@@ -68,35 +74,24 @@ public class Exercise {
 //		case "MolarityMol":
 //			this.createMolarityMol(seed);
 //			break;
-//		case "MolarityIonsMol":
-//			this.createMolarityIonsMol(seed);
-//			break;
-//		case "MolarityVolume":
-//			this.createMolarityVolume(seed);
-//			break;
-//		case "MolParticles":
-//			if (compound.getType().equals("metaal")) {
-//				this.createMolAtomsMetal(seed);
-//				break;
-//			} if (compound.getType().equals("zout")) {
-//				this.createMolAtomsMolecule(seed); //question is so similar these are the same method as molecules
-//				break;
-//			} if (compound.getType().equals("moleculair") && questionSelection.nextDouble() < 0.5) {
-//				this.createMolAtomsMolecule(seed);
-//				break;
-//			} else {
-//				this.createMolMolecules(seed);
-//				break;
-//			}
-//		case "ParticlesMol":
-//			this.createParticlesMol(seed);
-//			break;
-//		case "MolGas":
-//			this.createMolGas(seed);
-//			break;
-//		case "GasMol":
-//			this.createGasMol(seed);
-//			break;
+		case "MolarityIonsMol":
+			question = GenerateMolarityIonsMol.create(subseed, compound);
+			break;
+		case "MolarityVolume":
+			question = GenerateMolarityVolume.create(subseed, compound);
+			break;
+		case "MolParticles":
+			question = GenerateMolParticles.create(subseed, compound);
+			break;
+		case "ParticlesMol":
+			question = GenerateParticlesMol.create(subseed, compound);
+			break;
+		case "MolGas":
+			question = GenerateMolGas.create(subseed, compound);
+			break;
+		case "GasMol":
+			question = GenerateGasMol.create(subseed,  compound);
+			break;
 		case "MassVolume":
 			question = GenerateMassVolume.create(subseed, compound);
 			break;

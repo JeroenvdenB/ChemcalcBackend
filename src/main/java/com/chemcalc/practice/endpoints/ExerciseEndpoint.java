@@ -21,7 +21,7 @@ public class ExerciseEndpoint {
 		
 		//Use 'repetitions' from the pathvariable to call that exact number of random compounds.
 		List<Compound> compounds = compoundService.randomCompound(repetitions, seed);
-		Exercise exercise = new Exercise("MassVolume", repetitions, seed);
+		Exercise exercise = new Exercise("MolarityIonsMol", repetitions, seed);
 		exercise.fillQuestionsList(compounds);		
 		return exercise;
 	}	

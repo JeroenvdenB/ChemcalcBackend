@@ -10,7 +10,7 @@ public interface Constants {
 	public final MathContext threeDigit = new MathContext(3);
 	public final MathContext twoDigit = new MathContext(2); 		
 	
-	public final BigDecimal avogadro = new BigDecimal("6.02214076E23");
+	public final BigDecimal avogadro = new BigDecimal("6.02214076E23", fiveDigit);
 	public final BigDecimal molarVolume = new BigDecimal("0.0245", threeDigit);
 	public final String lineBreak = "</br>&nbsp;&nbsp;";
 }
