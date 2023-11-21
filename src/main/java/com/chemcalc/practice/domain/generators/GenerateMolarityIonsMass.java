@@ -20,7 +20,7 @@ public class GenerateMolarityIonsMass implements Constants {
 		//Grab composition code in the form "X:3, Y:1, Z:1", split, and randomly select an ion
 		String composition = compound.getComposition();
 		String[] ions = composition.split(",");
-		int ionIndex = (int) Math.floor(localRandomNums.nextDouble()*ions.length);
+		int ionIndex = (int) Math.floor(localRandomNums.nextDouble(0.99d)*ions.length);
 		String[] atom = ions[ionIndex].trim().split(":");
 		String symbol = atom[0];
 		BigDecimal coefficient = new BigDecimal(atom[1]);

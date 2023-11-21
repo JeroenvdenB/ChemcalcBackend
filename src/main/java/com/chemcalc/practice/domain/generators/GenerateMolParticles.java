@@ -51,7 +51,7 @@ public class GenerateMolParticles implements Constants {
 		//Grab composition code in the form "X:3, Y:1, Z:1", split, and randomly select an atom or ion
 		String composition = compound.getComposition();
 		String[] atoms = composition.split(",");
-		int atomIndex = (int) Math.floor(localRandomNums.nextDouble()*atoms.length);
+		int atomIndex = (int) Math.floor(localRandomNums.nextDouble(0.99d)*atoms.length);
 		String[] atom = atoms[atomIndex].trim().split(":");
 		String symbol = atom[0];
 		BigDecimal coefficient = new BigDecimal(atom[1]);
