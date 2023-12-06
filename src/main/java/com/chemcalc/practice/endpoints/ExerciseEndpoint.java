@@ -19,33 +19,46 @@ import com.chemcalc.practice.domain.Compound;
 public class ExerciseEndpoint {
 	@Autowired
 	CompoundService compoundService;
-	
-	@GetMapping("anyCompoundExercise/{type}/{repetitions}/{seed}")
-	public Exercise generateAnyCompound(@PathVariable String type, @PathVariable int repetitions,
+
+	@GetMapping("getExercise/{type}/{repetitions}/{seed}")
+	public Exercise generateExercise(@PathVariable String type, @PathVariable int repetitions,
 			@PathVariable long seed) {
-		// Check that the provided type is allowed for the compound choice
-		// Valid for any compound would be:
-		String[] allowedQuestionTypes = {"Random", "MolMass", "MassMol", "MolParticles", "MassParticles"};
 		
-		if (Arrays.asList(allowedQuestionTypes).contains(type)) {
-			List<Compound> compounds = compoundService.randomCompound(repetitions, seed);
-			Exercise exercise = new Exercise(type, repetitions, seed);
-			exercise.fillQuestionsList(compounds);		
-			return exercise;
-		} else {
+		// A guide to show what type requires what compound type query
+		String[] needsRandomCompounds = {"Random", "MolMass", "MassMol", "MolParticles", "MassParticles"};
+		String[] needsNonMetalNonWater = {"MolMolarity", "MolarityMol", "MolarityVolume"};
+		String[] needsMolecularNonWater = {"MolarityMass", "MassMolarity"};
+		String[] needsNonSalt = {"ParticlesMol", "ParticlesMass"};
+		String[] needsSalt = {"MolMolarityIons", "MolarityIonsMol", "MolarityIonsMass", "MassMolarityIons"};
+		String[] needsGas = {"MolGas", "GasMol", "MassGas", "GasMass"};
+		String[] needsDensity = {"MassVolume", "VolumeMass"};
+
+		// Determine what service to use (aka what compounds to request) based on the question type
+		// Get compounds from database.
+		List<Compound> compounds;
+		if (Arrays.asList(needsRandomCompounds).contains(type)) {
+			compounds = compoundService.randomCompound(repetitions, seed);
+		} else if (Arrays.asList(needsNonMetalNonWater).contains(type)) {
+			compounds = compoundService.nonMetalNonWater(repetitions, seed);
+		} else if (Arrays.asList(needsMolecularNonWater).contains(type)) {
+			compounds = compoundService.molecularNonWater(repetitions, seed);
+		} else if (Arrays.asList(needsNonSalt).contains(type)) {
+			compounds = compoundService.nonSalt(repetitions, seed);
+		} else if (Arrays.asList(needsSalt).contains(type)) {
+			compounds = compoundService.saltOnly(repetitions, seed);
+		} else if (Arrays.asList(needsGas).contains(type)) {
+			compounds = compoundService.gasOnly(repetitions, seed);
+		} else if (Arrays.asList(needsDensity).contains(type)) {
+			compounds = compoundService.density(repetitions, seed);
+		}else {
 			String error = String.format("Invalid question type. %s is not allowed for %s.",
 					type, "any compound");
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, error);
 		}
-	}
-	
-	//TODO: build non-metal non-water endpoint
-	//TODO: build molecular non-water endpoint
-	//TODO: build non-salt endpoint
-	//TODO: build salt-only endpoint
-	//TODO: build gas-only endpoint
-	//TODO: build density-exists endpoint
-	
-	
-	
+		
+		Exercise exercise = new Exercise(type, repetitions, seed);
+		exercise.fillQuestionsList(compounds);	
+		
+		return exercise;
+	}	
 }

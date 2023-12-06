@@ -33,4 +33,28 @@ public class CompoundService {
 	public List<Compound> randomCompound(int limit, long seed) {
 		return compoundRepository.randomCompound(seed, limit);
 	}	
+	
+	public List<Compound> nonMetalNonWater(int limit, long seed) {
+		return compoundRepository.notMetalNotWater(seed, limit);
+	}
+	
+	public List<Compound> molecularNonWater(int limit, long seed) {
+		return compoundRepository.molecularNonWater(seed, limit);
+	}
+	
+	public List<Compound> nonSalt(int limit, long seed) {
+		return compoundRepository.nonSalt(seed, limit);
+	}
+	
+	public List<Compound> saltOnly(int limit, long seed) {
+		return compoundRepository.saltOnly(seed, limit);
+	}
+	
+	public List<Compound> gasOnly(int limit, long seed) {
+		return compoundRepository.gasOnly(seed, limit);
+	}
+	
+	public List<Compound> density(int limit, long seed) {
+		return compoundRepository.density(seed, limit);
+	}
 }
